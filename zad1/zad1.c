@@ -64,12 +64,17 @@ void calculateDegrees(int graphMatrix[][MAX]){
 
 // ------------------------------------------------
 
-int loadFile(char name[], int graphMatrix[][MAX]){
+int loadFile(int graphMatrix[][MAX]){
+
+    char fileName[50];
+
+    printf("Podaj nazwe pliku: \n");
+    scanf("%s",fileName);
 
     FILE *file;
 
-    if ((file=fopen(name, "r"))==NULL){
-        printf ("\nNie moge otworzyc pliku '%s' !\n", name);
+    if ((file=fopen(fileName, "r"))==NULL){
+        printf ("\nNie moge otworzyc pliku '%s' !\n", fileName);
         return 0;
     }
     else{
@@ -125,8 +130,7 @@ void deleteVertex(int graphMatrix[][MAX]){
             graphMatrix[j][i] = graphMatrix[j+nj][i+ni];
         }
 
-        ni = 0;
-        nj = 0;
+       ni = 0;
     }
 
     vertexes --;
@@ -214,7 +218,7 @@ void addDeleteEdge(int graphMatrix[][MAX], int type){
 
 // ------------------------------------------------
 
-void shwoVertexDegree(){
+void showVertexDegree(){
 
     int number = MAX + 1;
 
@@ -258,6 +262,122 @@ void printGraph(int graphMatrix[][MAX]){
 
 // ------------------------------------------------
 
+/*void matrixMultiplication(int graphMatrix[][MAX]){
+
+    int tabmatrix[MAX][MAX] = {0};
+    int i,j,k;
+
+    for(i=0; i<vertexes; i++){
+        for(j=0; j<vertexes; j++)
+        {
+            tabmatrix[i][j]=0;
+            for(k=0; k<vertexes; k++)
+               tabmatrix[i][j]=tabmatrix[i][j]+graphMatrix[i][k]*graphMatrix[k][j];
+
+        }
+    }
+
+     for(i=0; i<vertexes; i++){
+        printf("\n");
+        for(j=0; j<vertexes; j++){
+            printf("%d ",tabmatrix[i][j]);
+        }
+    }
+
+
+}*/
+
+int cycleSearch(int graphMatrix[][MAX]){
+
+    int tablecycle[MAX] = {0};
+    int counter = -1;
+    int i,j,k;
+
+    for(j=0; j<vertexes; j++){
+        for(i=0; i<vertexes; i++){
+            if(j != i){
+                if(graphMatrix[j][i]){
+                    counter ++;
+                    tablecycle[counter] = i;
+                }
+            }
+        }
+
+        for(k=0; k < counter; k++){
+            //printf("\n Sprawdzenie: [%d,%d] %d", tablecycle[k], tablecycle[k+1], graphMatrix[tablecycle[k]][tablecycle[k+1]]);
+            if(graphMatrix[tablecycle[k]][tablecycle[k+1]])
+                return 1;
+        }
+
+        counter = -1;
+    }
+    return 0;
+}
+
+// ------------------------------------------------
+
+int checkGraph(){
+
+    int j,i,counter,a;
+    int sum = 0;
+    int newtable[MAX];
+    char c, falseChar;
+
+    scanf("%c",&falseChar); // lapanie znaku nowej lini
+
+    printf("Podaj z ilu liczb sklada sie ciag: \n");
+    scanf("%d",&counter);
+    scanf("%c",&falseChar);
+
+    for(i=0; i < counter; i++){
+        printf("Podaj liczbe %d: \n",i+1);
+        scanf("%c",&c);
+        scanf("%c",&falseChar); // lapanie znaku nowej lini
+        newtable[i] = c - '0';
+    }
+
+    for(j=0; j<counter; ++j){
+        for(i= j+1; i<counter; ++i){
+            if (newtable[i] > newtable[j])
+            {
+                a =  newtable[i];
+                newtable[i] = newtable[j];
+                newtable[j] = a;
+            }
+        }
+    }
+
+    for(i=0; i < counter; i++){
+        sum = sum + newtable[i];
+    }
+
+    if(sum % 2 == 1)
+        return 0;
+    while(sum > 0){
+        for(i=1; i < newtable[0]; i++){
+            newtable[i-1] = newtable[i] - 1;
+            if(newtable[i-1] < 0)
+                return 0;
+        }
+
+        counter --;
+        sum = 0;
+
+        for(i=0; i < counter; i++){
+            sum = sum + newtable[i];
+        }
+
+        printf("\n %d", sum);
+    }
+
+    if(sum == 0)
+        return 1;
+    else
+        return 0;
+}
+
+// ------------------------------------------------
+
 int main(){
 
     int fileRead = 0;
@@ -267,9 +387,7 @@ int main(){
     int i,j,number;
 
     while(fileRead != 1){
-        printf("Podaj nazwe pliku: \n");
-        scanf("%s",fileName);
-        fileRead = loadFile(fileName, graphMatrix);
+        fileRead = loadFile(graphMatrix);
     }
 
     while(menu != 'q'){
@@ -281,7 +399,10 @@ int main(){
         printf("4) Dodaj krawedz  -  k \n");
         printf("5) Usun krawedz  -  u \n");
         printf("6) Wypisz stopien wierzcholka -  s \n");
-        printf("7) Zakoncz  -  q \n\n");
+        printf("7) Znajdz cykl C3 -  c \n");
+        printf("8) Wczytaj dane z pliku -  w \n");
+        printf("9) Podaj ciag do sprawdzenia (zad 3) -  g \n");
+        printf("10) Zakoncz  -  q \n\n");
         scanf("%s",&menu);
 
         switch(menu){
@@ -306,7 +427,29 @@ int main(){
                 break;
 
             case 's':
-                shwoVertexDegree();
+                showVertexDegree();
+                break;
+
+            case 'c':
+                //matrixMultiplication(graphMatrix);
+                number = cycleSearch(graphMatrix);
+
+                if(number)
+                    printf("\n Graf posiada cykl C3! \n");
+                else
+                    printf("\n Graf nie posiada cyklu! \n");
+                break;
+
+            case 'w':
+                fileRead = loadFile(graphMatrix);
+                break;
+
+            case 'g':
+                number = checkGraph();
+                if(number)
+                    printf("\n Ciag jest graficny! \n");
+                else
+                    printf("\n Ciag nie jest graficzny! \n");
                 break;
 
             case 'q':
