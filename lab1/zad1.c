@@ -12,17 +12,17 @@ int even = 0;
 
 // ------------------------------------------------
 
-void sortArray(int sortDegree[]){
+void sortArray(int * sortarray, int numbers){
 
     int i,j,a;
 
-    for(j=0; j<vertexes; ++j){
-        for(i= j+1; i<vertexes; ++i){
-            if (sortDegree[i] > sortDegree[j])
+    for(j=0; j<numbers; ++j){
+        for(i= j+1; i<numbers; ++i){
+            if (sortarray[i] > sortarray[j])
             {
-                a =  sortDegree[i];
-                sortDegree[i] = sortDegree[j];
-                sortDegree[j] = a;
+                a =  sortarray[i];
+                sortarray[i] = sortarray[j];
+                sortarray[j] = a;
             }
         }
     }
@@ -59,7 +59,7 @@ void calculateDegrees(int graphMatrix[][MAX]){
         counter = 0;
     }
 
-    sortArray(sortDegree);
+    sortArray(sortDegree, vertexes);
 }
 
 // ------------------------------------------------
@@ -112,7 +112,7 @@ void deleteVertex(int graphMatrix[][MAX]){
     int nj = 0;
     int number = MAX + 1;
 
-    while(number > vertexes){
+    while(number >= vertexes){
         printf("Podaj wierzcholek do usuniecia: \n");
         scanf("%d",&number);
         if(number > vertexes)
@@ -180,15 +180,20 @@ void addDeleteEdge(int graphMatrix[][MAX], int type){
 
     int one = 0;
     int two = 0;
+    int good = 1;
 
-    while(one == two){
+    while(good){
         printf("Podaj pierwszy wierzcholek: \n");
         scanf("%d",&one);
         printf("Podaj drugi wierzcholek: \n");
         scanf("%d",&two);
 
-        if(one == two)
+        if(one == two || two >= vertexes || one >= vertexes){
+            good = 1;
             printf("Nieprawidlowe liczby! \n");
+        }
+        else
+            good = 0;
     }
 
     printf("\n %d  %d \n", graphMatrix[one][two], graphMatrix[two][one]);
@@ -222,7 +227,7 @@ void showVertexDegree(){
 
     int number = MAX + 1;
 
-    while(number > vertexes){
+    while(number >= vertexes){
         printf("Podaj wierzcholek: \n");
         scanf("%d",&number);
         if(number < vertexes)
@@ -262,122 +267,6 @@ void printGraph(int graphMatrix[][MAX]){
 
 // ------------------------------------------------
 
-/*void matrixMultiplication(int graphMatrix[][MAX]){
-
-    int tabmatrix[MAX][MAX] = {0};
-    int i,j,k;
-
-    for(i=0; i<vertexes; i++){
-        for(j=0; j<vertexes; j++)
-        {
-            tabmatrix[i][j]=0;
-            for(k=0; k<vertexes; k++)
-               tabmatrix[i][j]=tabmatrix[i][j]+graphMatrix[i][k]*graphMatrix[k][j];
-
-        }
-    }
-
-     for(i=0; i<vertexes; i++){
-        printf("\n");
-        for(j=0; j<vertexes; j++){
-            printf("%d ",tabmatrix[i][j]);
-        }
-    }
-
-
-}*/
-
-int cycleSearch(int graphMatrix[][MAX]){
-
-    int tablecycle[MAX] = {0};
-    int counter = -1;
-    int i,j,k;
-
-    for(j=0; j<vertexes; j++){
-        for(i=0; i<vertexes; i++){
-            if(j != i){
-                if(graphMatrix[j][i]){
-                    counter ++;
-                    tablecycle[counter] = i;
-                }
-            }
-        }
-
-        for(k=0; k < counter; k++){
-            //printf("\n Sprawdzenie: [%d,%d] %d", tablecycle[k], tablecycle[k+1], graphMatrix[tablecycle[k]][tablecycle[k+1]]);
-            if(graphMatrix[tablecycle[k]][tablecycle[k+1]])
-                return 1;
-        }
-
-        counter = -1;
-    }
-    return 0;
-}
-
-// ------------------------------------------------
-
-int checkGraph(){
-
-    int j,i,counter,a;
-    int sum = 0;
-    int newtable[MAX];
-    char c, falseChar;
-
-    scanf("%c",&falseChar); // lapanie znaku nowej lini
-
-    printf("Podaj z ilu liczb sklada sie ciag: \n");
-    scanf("%d",&counter);
-    scanf("%c",&falseChar);
-
-    for(i=0; i < counter; i++){
-        printf("Podaj liczbe %d: \n",i+1);
-        scanf("%c",&c);
-        scanf("%c",&falseChar); // lapanie znaku nowej lini
-        newtable[i] = c - '0';
-    }
-
-    for(j=0; j<counter; ++j){
-        for(i= j+1; i<counter; ++i){
-            if (newtable[i] > newtable[j])
-            {
-                a =  newtable[i];
-                newtable[i] = newtable[j];
-                newtable[j] = a;
-            }
-        }
-    }
-
-    for(i=0; i < counter; i++){
-        sum = sum + newtable[i];
-    }
-
-    if(sum % 2 == 1)
-        return 0;
-    while(sum > 0){
-        for(i=1; i < newtable[0]; i++){
-            newtable[i-1] = newtable[i] - 1;
-            if(newtable[i-1] < 0)
-                return 0;
-        }
-
-        counter --;
-        sum = 0;
-
-        for(i=0; i < counter; i++){
-            sum = sum + newtable[i];
-        }
-
-        printf("\n %d", sum);
-    }
-
-    if(sum == 0)
-        return 1;
-    else
-        return 0;
-}
-
-// ------------------------------------------------
-
 int main(){
 
     int fileRead = 0;
@@ -399,9 +288,7 @@ int main(){
         printf("4) Dodaj krawedz  -  k \n");
         printf("5) Usun krawedz  -  u \n");
         printf("6) Wypisz stopien wierzcholka -  s \n");
-        printf("7) Znajdz cykl C3 -  c \n");
         printf("8) Wczytaj dane z pliku -  w \n");
-        printf("9) Podaj ciag do sprawdzenia (zad 3) -  g \n");
         printf("10) Zakoncz  -  q \n\n");
         scanf("%s",&menu);
 
@@ -430,26 +317,8 @@ int main(){
                 showVertexDegree();
                 break;
 
-            case 'c':
-                //matrixMultiplication(graphMatrix);
-                number = cycleSearch(graphMatrix);
-
-                if(number)
-                    printf("\n Graf posiada cykl C3! \n");
-                else
-                    printf("\n Graf nie posiada cyklu! \n");
-                break;
-
             case 'w':
                 fileRead = loadFile(graphMatrix);
-                break;
-
-            case 'g':
-                number = checkGraph();
-                if(number)
-                    printf("\n Ciag jest graficny! \n");
-                else
-                    printf("\n Ciag nie jest graficzny! \n");
                 break;
 
             case 'q':
