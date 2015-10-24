@@ -69,13 +69,11 @@ void cycleSearch(int graphMatrix[][MAX]){
             if(tablecycle[counter] != i){
                 if(graphMatrix[tablecycle[counter]][i]){
                     for(j=0; j <= counter; j++){
-                       /* printf("\n porownanie: tablecycle[j] %d - %d graphMatrix[tablecycle[counter]][i]  \n", tablecycle[j],i );*/
                         if(tablecycle[j] == i){
                             k = 0;
                         }
                     }
                     if(k){
-                       /* printf("\n pozytywny sasiad: %d   \n", i);*/
                         tableneighbor[neighborcounter] = i;
                         neighborcounter ++;
                     }
@@ -87,7 +85,6 @@ void cycleSearch(int graphMatrix[][MAX]){
         if(neighborcounter > 1){
             r = rand() % neighborcounter;
             counter ++;
-           /* printf("\n wybrany sasiad sasiad: %d , gdzie r: %d   \n", tableneighbor[r], r)*/
             tablecycle[counter] = tableneighbor[r];
         }
         else if(neighborcounter == 1){
