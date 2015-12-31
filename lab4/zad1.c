@@ -30,7 +30,7 @@ void loadFile(int graphMatrix[][MAX]){
 
     FILE *file;
 
-    file=fopen("dane.txt", "r");
+    file=fopen("dane3.txt", "r");
 
     char c;
     int counterRows = 0;
@@ -54,7 +54,9 @@ void loadFile(int graphMatrix[][MAX]){
         tableDegree[counterRows] = degree;
 
         vertexes = counterRows + 1;
+		vertexes = 7;
     }
+
 
     fclose(file);
 }
@@ -64,6 +66,7 @@ void loadFile(int graphMatrix[][MAX]){
 void findEuler(int graphMatrix[][MAX]){
 
     loadFile(graphMatrix);
+	printGraph(graphMatrix);
 
     int stos[MAX] = {0}; // stos pusty
     int stosCounter = 0;
