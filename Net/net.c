@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #define MAX 10
 
 int vertexes = 0;
@@ -60,27 +61,62 @@ void printMinCut(){
 
 // ------------------------------------------------
 
-void loadFile(){
+int loadFile(){
 
     FILE *file;
 
-    file=fopen("dane2.txt", "r");
+    char fileName[50];
+    int checkData = 1;
 
-    int i,j;
+    printf("Podaj nazwe pliku: \n");
+    scanf("%s",fileName);
 
-    fscanf(file, "%d", &vertexes);
+    if ((file=fopen(fileName, "r"))==NULL){
+        printf ("\nNie moge otworzyc pliku '%s' !\n", fileName);
+        return 0;
+    }
+    else{
 
-    for(i=0; i<vertexes; i++){
+        int i,j;
 
-        marks[i][0] = -1;    // add zeros to marks array
-        marks[i][1] = 0;
+        fscanf(file, "%d", &vertexes);
 
-        for(j=0; j<vertexes; j++){
-            fscanf(file, "%d", &flowMatrix[i][j]);
+        for(i=0; i<vertexes; i++){
+
+            marks[i][0] = -1;    // delete marks in array
+            marks[i][1] = 0;
+
+            for(j=0; j<vertexes; j++){
+                fscanf(file, "%d", &flowMatrix[i][j]);
+
+                if(i == vertexes - 1 && flowMatrix[i][j] != 0){
+                    printf ("\nNie nieprawidlowa siec w pliku '%s' !\n", fileName);
+                    return 0;
+                }
+            }
+        }
+
+        fclose(file);
+
+        checkData = residualGraph(1);
+
+        if(checkData){
+            maxFlow = 0;
+            memset(marked, 0, sizeof marked);
+
+            for(i=0; i<vertexes; i++){
+                marks[i][0] = -1;    // delete marks in array
+                marks[i][1] = 0;
+            }
+
+            markedCounter = 0;
+            return 1;
+        }
+        else{
+            printf ("\nNie nieprawidlowa siec w pliku '%s' !\n", fileName);
+            return 0;
         }
     }
-
-    fclose(file);
 }
 
 // ------------------------------------------------
@@ -89,7 +125,7 @@ void flowGraphFix(int L[], int counter){
 
     int i;
 
-    printf("----------- flowGraphFix -----------\n");
+    printf("-------------------------------\n");
 
     markedCounter = 0; // marked delete because not end of algorithm
 
@@ -102,7 +138,7 @@ void flowGraphFix(int L[], int counter){
 
     int flow = marks[L[counter-1]][1];
 
-    while(y != -2){
+    while(y != -2){  // go from 't' to 's' by marks
 
         if(marks[x][1] > 0){
             flowMatrix[y][x] -= flow;
@@ -124,26 +160,21 @@ void flowGraphFix(int L[], int counter){
     }
 
     for(i=0; i<vertexes; i++){
-        if(marks[i][0] != -1){
-
-        }
         marks[i][0]= -1;
         marks[i][1]= 0;
     }
 
-    printGraph(flowMatrix);
-    printGraph(antiflowMatrix);
+  //  printGraph(flowMatrix);
+  //  printGraph(antiflowMatrix);
 
-    maxFlow += flow;
+    maxFlow += flow;  // inc maxFlow
 
-    printf("Max flow: %d \n\n", maxFlow);
+  //  printf("Max flow: %d \n\n", maxFlow);
 }
 
 // ------------------------------------------------
 
-int residualGraph(){
-
-    printf("----------- Residual-graph -----------\n");
+int residualGraph(int flag){
 
     int L[MAX] = {0};
     int counterL;
@@ -160,7 +191,7 @@ int residualGraph(){
     while(L[pointerL] != vertexes - 1 && status){
 
         for(i=0; i<vertexes; i++){
-            if(flowMatrix[L[pointerL]][i] && i != L[pointerL]){ 
+            if(flowMatrix[L[pointerL]][i] && i != L[pointerL]){  // search for + marks
 
                 if(marks[i][0] == -1){
 
@@ -176,9 +207,8 @@ int residualGraph(){
                             marks[i][1] = marks[L[pointerL]][1];
                     }
 
-                    printf(" i :  %d \n",i);
-
-                    printf("Add mark+ = (%d,%d) \n", marks[i][0],marks[i][1]);
+                    //printf(" i :  %d \n",i);
+                    //printf("Add mark+ = (%d,%d) \n", marks[i][0],marks[i][1]);
                     marked[markedCounter] = i;
                     markedCounter ++;
 
@@ -193,7 +223,7 @@ int residualGraph(){
         }
 
         for(i=0; i<vertexes; i++){
-            if(antiflowMatrix[L[pointerL]][i] && i != L[pointerL]){
+            if(antiflowMatrix[L[pointerL]][i] && i != L[pointerL]){  // search for - marks
 
                 if(marks[i][0] == -1){
                     marks[i][0] = L[pointerL];
@@ -205,8 +235,8 @@ int residualGraph(){
                         marks[i][1] = marks[L[pointerL]][1] * -1;
                     }
 
-                    printf(" i :  %d \n",i);
-                    printf("Add mark - = (%d,%d) \n", marks[i][0],marks[i][1]);
+                    //printf(" i :  %d \n",i);
+                    //printf("Add mark - = (%d,%d) \n", marks[i][0],marks[i][1]);
                     marked[markedCounter] = i;
                     markedCounter ++;
 
@@ -216,7 +246,7 @@ int residualGraph(){
             }
         }
 
-        if(counterL == pointerL + 1){
+        if(counterL == pointerL + 1){ // if 't' not marked return 0;
             status = 0;
             return 0;
         }
@@ -225,10 +255,12 @@ int residualGraph(){
         }
         
 
-        printf("Point now: %d \n", L[pointerL]);
+        //printf("Point now: %d \n", L[pointerL]);
     }
 
-    flowGraphFix(L,counterL);
+    if(flag == 0)
+        flowGraphFix(L,counterL);  // fix flow graph after marking
+    
     return 1;
 }
 
@@ -240,10 +272,10 @@ int FFA(){
 
     int status = 1;
 
-    status = residualGraph();
+    status = residualGraph(0);
 
-    while(status){
-        status = residualGraph();
+    while(status){  // while 't' in L stack continue 
+        status = residualGraph(0);
     }
 }
 
@@ -251,35 +283,10 @@ int FFA(){
 
 int main(){
 
-    char menu = 'o';
-    int i,j,number;
-
-    while(menu != 'q'){
-
-        printf("\n ------ MENU ------ \n");
-        printf("1) Znajdz maksymalny przeplyw -  c \n");
-        printf("2) Wczytaj dane z pliku -  w \n");
-        printf("3) Zakoncz  -  q \n\n");
-        scanf("%s",&menu);
-
-        switch(menu){
-
-            case 'c':
-                loadFile(flowMatrix);
-                FFA(flowMatrix);
-                printMinCut();
-                printf("Max flow: %d \n\n", maxFlow);
-                break;
-
-            case 'w':
-                loadFile(flowMatrix);
-                break;
-
-            case 'q':
-                printf("Dziekuje. \n");
-                break;
-        }
-    }
+    loadFile(flowMatrix);
+    FFA();
+    printMinCut();
+    printf("Max flow: %d \n\n", maxFlow);
 
     return 0;
 
