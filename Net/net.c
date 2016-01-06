@@ -4,11 +4,10 @@
 
 int vertexes = 0;
 
+char fileName[50];
 int flowMatrix[MAX][MAX];
 int marks[MAX][2];
 int maxFlow = 0;
-int marked[MAX] = {0};
-int markedCounter = 0;
 
 //  ------------------------------------------------------
 
@@ -29,31 +28,46 @@ void printGraph(int flowMatrix[][MAX]){
 // ------------------------------------------------
 
 void printMinCut(){
-    int i,j;
-    int k = 0;
+
+    int i,j,k;
+    int counterX = 0;
+    int counterY = 0;
+    int X[MAX] = {0};
+    int Y[MAX] = {0};
 
     printf("\nMinimal Cut \n");
 
-    printf("X = {");
-    printf(" 0 ");
-    for(j=0; j<markedCounter; j++){
-        printf(" %d ", marked[j]);
+    for(i=0; i<vertexes; i++){ // sort marked to X, unmarked to y
+        if(marks[i][0] != -1){
+            X[counterX] = i;
+            counterX ++;
+        }
+        else{
+            Y[counterY] = i;
+            counterY ++;
+        }
+    }
+
+    printGraph(flowMatrix);
+    printf("\n");
+
+    for(i=0; i<counterX; i++){
+        for(j=0; j<counterY; j++){
+            if(flowMatrix[Y[j]][X[i]] && X[i] < Y[j]){ // always flow to source
+                printf("(%d,%d) ", X[i], Y[j]);
+            }
+        }
+    }
+
+    printf("\nX = {");
+    for(i=0; i<counterX; i++){
+        printf(" %d ", X[i]);
     }
     printf("}\n");
 
     printf("V/X = {");
-    for(i=1; i<vertexes; i++){
-        k = 0;
-
-        for(j=0; j<markedCounter; j++){
-            if(marked[j] == i){
-                k = 1;
-            }
-        }
-
-        if(!k){
-            printf(" %d ", i);
-        }
+    for(i=0; i<counterY; i++){
+        printf(" %d ", Y[i]);
     }
     printf("}\n\n");
 }
@@ -64,11 +78,7 @@ int loadFile(){
 
     FILE *file;
 
-    char fileName[50];
     int checkData = 1;
-
-    printf("Podaj nazwe pliku: \n");
-    scanf("%s",fileName);
 
     if ((file=fopen(fileName, "r"))==NULL){
         printf ("\nNie moge otworzyc pliku '%s' !\n", fileName);
@@ -97,18 +107,16 @@ int loadFile(){
 
         fclose(file);
 
-        checkData = residualGraph(1);
+        checkData = markGraph(1);
 
         if(checkData){
             maxFlow = 0;
-            memset(marked, 0, sizeof marked);
 
             for(i=0; i<vertexes; i++){
                 marks[i][0] = -1;    // delete marks in array
                 marks[i][1] = 0;
             }
 
-            markedCounter = 0;
             return 1;
         }
         else{
@@ -125,8 +133,6 @@ void flowGraphFix(int L[], int counter){
     int i;
 
     printf("-------------------------------\n");
-
-    markedCounter = 0; // marked delete because not end of algorithm
 
     int x = L[counter-1];
     int y = marks[L[counter-1]][0];
@@ -148,16 +154,12 @@ void flowGraphFix(int L[], int counter){
         marks[i][1]= 0;
     }
 
-  //  printGraph(flowMatrix);
-
     maxFlow += flow;  // inc maxFlow
-
-  //  printf("Max flow: %d \n\n", maxFlow);
 }
 
 // ------------------------------------------------
 
-int residualGraph(int flag){
+int markGraph(int flag){
 
     printGraph(flowMatrix);
     int L[MAX] = {0};
@@ -171,32 +173,28 @@ int residualGraph(int flag){
     marks[0][0] = -2;
     marks[0][1] = 1000000;
 
-    printf("Mark 0 = (-1,+inf) \n");
+    printf("\nMark 0 = (-1,+inf) \n");
 
     while(L[pointerL] != vertexes - 1){
 
         for(i=0; i<vertexes; i++){
-            if(flowMatrix[L[pointerL]][i] && i != L[pointerL]){  // search for + marks
+            if(flowMatrix[L[pointerL]][i] && i != L[pointerL]){  // search for capacity in matrix
 
-                if(marks[i][0] == -1){
+                if(marks[i][0] == -1){  // if not marked
 
                     marks[i][0] = L[pointerL];
 
-                    if(flowMatrix[L[pointerL]][i] < marks[L[pointerL]][1]){
+                    if(flowMatrix[L[pointerL]][i] < marks[L[pointerL]][1]){ // for [-1,+inf] inf always bigger
                         marks[i][1] = flowMatrix[L[pointerL]][i];
                     }
                     else{
                         marks[i][1] = marks[L[pointerL]][1];
                     }
 
-                    //printf(" i :  %d \n",i);
-                    if(i > L[pointerL])
+                    if(L[pointerL] < i)
                         printf("Mark %d = (%d+,%d) \n", i, marks[i][0],marks[i][1]); // add + mark
                     else
                         printf("Mark %d = (%d-,%d) \n", i, marks[i][0],marks[i][1]); // add - mark
-
-                    marked[markedCounter] = i;
-                    markedCounter ++;
 
                     L[counterL] = i;
                     counterL ++;
@@ -210,9 +208,6 @@ int residualGraph(int flag){
         else{
             pointerL++;
         }
-        
-
-        //printf("Point now: %d \n", L[pointerL]);
     }
 
     if(flag == 0)
@@ -225,20 +220,19 @@ int residualGraph(int flag){
 
 int FFA(){
 
-    //printGraph(flowMatrix);
-
-    int status = 1;
-
-    status = residualGraph(0);
+    int status = markGraph(0);
 
     while(status){  // while 't' in L stack continue 
-        status = residualGraph(0);
+        status = markGraph(0);
     }
 }
 
 // ------------------------------------------------
 
 int main(){
+
+    printf("Podaj nazwe pliku: \n");
+    scanf("%s",fileName);
 
     loadFile();
     FFA();
