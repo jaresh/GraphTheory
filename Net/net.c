@@ -5,7 +5,6 @@
 int vertexes = 0;
 
 int flowMatrix[MAX][MAX];
-int antiflowMatrix[MAX][MAX];
 int marks[MAX][2];
 int maxFlow = 0;
 int marked[MAX] = {0};
@@ -142,7 +141,7 @@ void flowGraphFix(int L[], int counter){
 
         if(marks[x][1] > 0){
             flowMatrix[y][x] -= flow;
-            antiflowMatrix[x][y] += flow;
+            flowMatrix[x][y] += flow;
             
             counter --;
             x = y;
@@ -150,7 +149,7 @@ void flowGraphFix(int L[], int counter){
         }
         else{
             flowMatrix[x][y] += flow;
-            antiflowMatrix[y][x] -= flow;
+            flowMatrix[y][x] -= flow;
             
             counter --;
             x = y;
@@ -165,7 +164,6 @@ void flowGraphFix(int L[], int counter){
     }
 
   //  printGraph(flowMatrix);
-  //  printGraph(antiflowMatrix);
 
     maxFlow += flow;  // inc maxFlow
 
@@ -176,6 +174,7 @@ void flowGraphFix(int L[], int counter){
 
 int residualGraph(int flag){
 
+    printGraph(flowMatrix);
     int L[MAX] = {0};
     int counterL;
     int pointerL;
@@ -220,16 +219,14 @@ int residualGraph(int flag){
                     }
                 }
             }
-        }
 
-        for(i=0; i<vertexes; i++){
-            if(antiflowMatrix[L[pointerL]][i] && i != L[pointerL]){  // search for - marks
+            else if(flowMatrix[i][L[pointerL]] < 0 && i != L[pointerL]){  // search for - marks
 
                 if(marks[i][0] == -1){
                     marks[i][0] = L[pointerL];
 
-                    if(antiflowMatrix[L[pointerL]][i] < marks[L[pointerL]][1]){
-                        marks[i][1] = antiflowMatrix[L[pointerL]][i] * -1;
+                    if(flowMatrix[i][L[pointerL]] < marks[L[pointerL]][1]){
+                        marks[i][1] = flowMatrix[i][L[pointerL]] * -1;
                     }
                     else{
                         marks[i][1] = marks[L[pointerL]][1] * -1;
@@ -283,7 +280,7 @@ int FFA(){
 
 int main(){
 
-    loadFile(flowMatrix);
+    loadFile();
     FFA();
     printMinCut();
     printf("Max flow: %d \n\n", maxFlow);
