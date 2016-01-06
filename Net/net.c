@@ -128,10 +128,6 @@ void flowGraphFix(int L[], int counter){
 
     markedCounter = 0; // marked delete because not end of algorithm
 
-    for(i=0; i<counter; i++){
-         printf("Mark %d = (%d,%d) \n",i , marks[i][0],marks[i][1]);
-    }
-
     int x = L[counter-1];
     int y = marks[L[counter-1]][0];
 
@@ -139,22 +135,11 @@ void flowGraphFix(int L[], int counter){
 
     while(y != -2){  // go from 't' to 's' by marks
 
-        if(marks[x][1] > 0){
-            flowMatrix[y][x] -= flow;
-            flowMatrix[x][y] += flow;
-            
-            counter --;
-            x = y;
-            y = marks[x][0];
-        }
-        else{
-            flowMatrix[x][y] += flow;
-            flowMatrix[y][x] -= flow;
-            
-            counter --;
-            x = y;
-            y = marks[x][0];
-        }
+        flowMatrix[x][y] += flow;
+        flowMatrix[y][x] -= flow;
+        counter --;
+        x = y;
+        y = marks[x][0];
         
     }
 
@@ -178,8 +163,7 @@ int residualGraph(int flag){
     int L[MAX] = {0};
     int counterL;
     int pointerL;
-    int i;
-    int status = 1;
+    int i = 0;
 
     L[0] = 0;   // add 's' to stack
     counterL = 1; // inc counter
@@ -187,7 +171,9 @@ int residualGraph(int flag){
     marks[0][0] = -2;
     marks[0][1] = 1000000;
 
-    while(L[pointerL] != vertexes - 1 && status){
+    printf("Mark 0 = (-1,+inf) \n");
+
+    while(L[pointerL] != vertexes - 1){
 
         for(i=0; i<vertexes; i++){
             if(flowMatrix[L[pointerL]][i] && i != L[pointerL]){  // search for + marks
@@ -200,40 +186,15 @@ int residualGraph(int flag){
                         marks[i][1] = flowMatrix[L[pointerL]][i];
                     }
                     else{
-                        if(marks[L[pointerL]][1] < 0)
-                            marks[i][1] = marks[L[pointerL]][1] * -1;
-                        else
-                            marks[i][1] = marks[L[pointerL]][1];
+                        marks[i][1] = marks[L[pointerL]][1];
                     }
 
                     //printf(" i :  %d \n",i);
-                    //printf("Add mark+ = (%d,%d) \n", marks[i][0],marks[i][1]);
-                    marked[markedCounter] = i;
-                    markedCounter ++;
+                    if(i > L[pointerL])
+                        printf("Mark %d = (%d+,%d) \n", i, marks[i][0],marks[i][1]); // add + mark
+                    else
+                        printf("Mark %d = (%d-,%d) \n", i, marks[i][0],marks[i][1]); // add - mark
 
-                    L[counterL] = i;
-                    counterL ++;
-
-                    if(i == vertexes - 1){
-                        i = vertexes;
-                    }
-                }
-            }
-
-            else if(flowMatrix[i][L[pointerL]] < 0 && i != L[pointerL]){  // search for - marks
-
-                if(marks[i][0] == -1){
-                    marks[i][0] = L[pointerL];
-
-                    if(flowMatrix[i][L[pointerL]] < marks[L[pointerL]][1]){
-                        marks[i][1] = flowMatrix[i][L[pointerL]] * -1;
-                    }
-                    else{
-                        marks[i][1] = marks[L[pointerL]][1] * -1;
-                    }
-
-                    //printf(" i :  %d \n",i);
-                    //printf("Add mark - = (%d,%d) \n", marks[i][0],marks[i][1]);
                     marked[markedCounter] = i;
                     markedCounter ++;
 
@@ -244,7 +205,6 @@ int residualGraph(int flag){
         }
 
         if(counterL == pointerL + 1){ // if 't' not marked return 0;
-            status = 0;
             return 0;
         }
         else{
@@ -265,7 +225,7 @@ int residualGraph(int flag){
 
 int FFA(){
 
-    printGraph(flowMatrix);
+    //printGraph(flowMatrix);
 
     int status = 1;
 
