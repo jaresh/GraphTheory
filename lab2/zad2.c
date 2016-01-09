@@ -72,6 +72,7 @@ void printGraph(int graphMatrix[][MAX]){
 
 void cycleSearch(int graphMatrix[][MAX]){
 
+    printf("funkcja\n");
     int fathertable[MAX][2] = {-2};
     int leaftable[MAX][2] = {0};
     int leaftablepom[MAX][2] = {0};
@@ -178,6 +179,7 @@ int main(){
         switch(menu){
 
             case 'c':
+                printf("switch\n");
                 cycleSearch(graphMatrix);
                 break;
 

@@ -64,7 +64,7 @@ int cycleSearch(int graphMatrix[][MAX]){
 
         for(k=0; k < counter; k++){
             for(i=k; i< counter; i++){
-               if(graphMatrix[tablecycle[i]][tablecycle[i+1]])
+               if(graphMatrix[tablecycle[k]][tablecycle[i+1]]) // k zamiast i w pierwszym.
                 return 1;
             }
         }

@@ -202,7 +202,7 @@ int markGraph(int flag){
             }
         }
 
-        if(counterL == pointerL + 1){ // if 't' not marked return 0;
+        if(counterL == pointerL + 1){ // if 't' not marked and no vertex to point at, return 0;
             return 0;
         }
         else{
